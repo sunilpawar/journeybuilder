@@ -10,7 +10,9 @@ class CRM_Journeybuilder_Page_Builder extends CRM_Core_Page {
       ->addStyleFile('com.skvare.journeybuilder', 'css/journey-builder.css')
       ->addScriptFile('com.skvare.journeybuilder', 'js/journey-builder.js')
       ->addScriptFile('com.skvare.journeybuilder', 'js/d3.min.js')
+      ->addScriptFile('com.skvare.journeybuilder', 'js/crossfilter.min.js')
       ->addScriptFile('com.skvare.journeybuilder', 'js/fabric.min.js');
+
 
     // Get journey ID if editing existing journey
     $journeyId = CRM_Utils_Request::retrieve('id', 'Positive', $this, FALSE);

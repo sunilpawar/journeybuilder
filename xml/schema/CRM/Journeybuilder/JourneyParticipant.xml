@@ -61,8 +61,9 @@
     <type>varchar</type>
     <title>Status</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Status Operator</comment>
-    <default>active</default>
+    <default>'active'</default>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyParticipant::getStatusOptions</callback>
     </pseudoconstant>

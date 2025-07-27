@@ -19,6 +19,7 @@ SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `civicrm_journey_participants`;
 DROP TABLE IF EXISTS `civicrm_journey_email_templates`;
+DROP TABLE IF EXISTS `civicrm_journey_connections`;
 DROP TABLE IF EXISTS `civicrm_journey_conditions`;
 DROP TABLE IF EXISTS `civicrm_journey_analytics`;
 DROP TABLE IF EXISTS `civicrm_journey_steps`;

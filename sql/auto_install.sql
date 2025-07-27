@@ -19,6 +19,7 @@ SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `civicrm_journey_participants`;
 DROP TABLE IF EXISTS `civicrm_journey_email_templates`;
+DROP TABLE IF EXISTS `civicrm_journey_connections`;
 DROP TABLE IF EXISTS `civicrm_journey_conditions`;
 DROP TABLE IF EXISTS `civicrm_journey_analytics`;
 DROP TABLE IF EXISTS `civicrm_journey_steps`;
@@ -44,7 +45,7 @@ CREATE TABLE `civicrm_journey_campaigns` (
   `name` varchar(255) NOT NULL,
   `description` text COMMENT 'Description.',
   `configuration` longtext COMMENT 'Configuration.',
-  `status` varchar(0) DEFAULT draft COMMENT 'Campaign status',
+  `status` varchar(20) DEFAULT 'draft' COMMENT 'Campaign status',
   `created_date` datetime,
   `modified_date` datetime,
   `activated_date` datetime,
@@ -64,7 +65,7 @@ ENGINE=InnoDB;
 CREATE TABLE `civicrm_journey_steps` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique JourneyStep ID',
   `journey_id` int unsigned COMMENT 'FK to journey',
-  `step_type` varchar(0) COMMENT 'step type',
+  `step_type` varchar(20) COMMENT 'step type',
   `name` varchar(255) NOT NULL,
   `configuration` longtext COMMENT 'Configuration.',
   `position_x` decimal(20,2) DEFAULT 0 COMMENT 'position x',
@@ -87,10 +88,12 @@ CREATE TABLE `civicrm_journey_analytics` (
   `journey_id` int unsigned COMMENT 'FK to journey',
   `step_id` int unsigned COMMENT 'FK to Steps',
   `contact_id` int unsigned COMMENT 'FK to Contact',
-  `event_type` varchar(0) COMMENT 'Event Type',
+  `event_type` varchar(20) COMMENT 'Event Type',
   `event_data` longtext COMMENT 'Event Data.',
   `event_date` datetime,
   PRIMARY KEY (`id`),
+  INDEX `idx_journey_contact_date`(journey_id, contact_id, event_date),
+  INDEX `idx_event_type_date`(event_type, event_date),
   CONSTRAINT FK_civicrm_journey_analytics_journey_id FOREIGN KEY (`journey_id`) REFERENCES `civicrm_journey_campaigns`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_journey_analytics_step_id FOREIGN KEY (`step_id`) REFERENCES `civicrm_journey_steps`(`id`) ON DELETE CASCADE)
 ENGINE=InnoDB;
@@ -105,16 +108,38 @@ ENGINE=InnoDB;
 CREATE TABLE `civicrm_journey_conditions` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique JourneyCondition ID',
   `step_id` int unsigned COMMENT 'FK to step',
-  `condition_type` varchar(0) COMMENT 'condition type',
+  `condition_type` varchar(20) COMMENT 'condition type',
   `field_name` varchar(255),
-  `operator` varchar(0) COMMENT 'Operator type',
+  `operator` varchar(20) COMMENT 'Operator type',
   `value` text COMMENT 'value.',
-  `logic_operator` varchar(0) DEFAULT AND COMMENT 'Logic Operator',
+  `logic_operator` varchar(20) DEFAULT 'AND' COMMENT 'Logic Operator',
   `sort_order` int unsigned COMMENT 'Sort Order',
   `contact_id` int unsigned COMMENT 'FK to Contact',
   PRIMARY KEY (`id`),
   CONSTRAINT FK_civicrm_journey_conditions_step_id FOREIGN KEY (`step_id`) REFERENCES `civicrm_journey_steps`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_journey_conditions_contact_id FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_journey_connections
+-- *
+-- * Journey Connection
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_journey_connections` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique JourneyConnection ID',
+  `journey_id` int unsigned COMMENT 'FK to Contact',
+  `from_step_id` int unsigned COMMENT 'FK to Steps',
+  `to_step_id` int unsigned COMMENT 'FK to Steps',
+  `condition_type` varchar(20) DEFAULT 'default' COMMENT 'Condition Type',
+  `condition_value` text COMMENT 'Condition Value.',
+  `percentage` decimal(20,2) DEFAULT NULL COMMENT 'percentage',
+  `sort_order` int unsigned COMMENT 'Sort Order',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_journey_connections_journey_id FOREIGN KEY (`journey_id`) REFERENCES `civicrm_journey_campaigns`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_journey_connections_from_step_id FOREIGN KEY (`from_step_id`) REFERENCES `civicrm_journey_steps`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_journey_connections_to_step_id FOREIGN KEY (`to_step_id`) REFERENCES `civicrm_journey_steps`(`id`) ON DELETE CASCADE)
 ENGINE=InnoDB;
 
 -- /*******************************************************
@@ -149,13 +174,14 @@ CREATE TABLE `civicrm_journey_participants` (
   `journey_id` int unsigned COMMENT 'FK to journey',
   `contact_id` int unsigned COMMENT 'FK to Contact',
   `current_step_id` int unsigned COMMENT 'FK to Steps',
-  `status` varchar(0) DEFAULT active COMMENT 'Status Operator',
+  `status` varchar(20) DEFAULT 'active' COMMENT 'Status Operator',
   `entered_date` datetime,
   `completed_date` datetime,
   `last_action_date` datetime,
   PRIMARY KEY (`id`),
   INDEX `idx_participant_status`(status),
   UNIQUE INDEX `unique_journey_contact`(journey_id, contact_id),
+  INDEX `idx_journey_status_date`(journey_id, status, last_action_date),
   CONSTRAINT FK_civicrm_journey_participants_journey_id FOREIGN KEY (`journey_id`) REFERENCES `civicrm_journey_campaigns`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_journey_participants_contact_id FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_journey_participants_current_step_id FOREIGN KEY (`current_step_id`) REFERENCES `civicrm_journey_steps`(`id`) ON DELETE SET NULL)

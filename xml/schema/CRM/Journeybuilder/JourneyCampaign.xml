@@ -63,8 +63,9 @@
     <type>varchar</type>
     <title>Status</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Campaign status</comment>
-    <default>draft</default>
+    <default>'draft'</default>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::campaignStatus</callback>
     </pseudoconstant>

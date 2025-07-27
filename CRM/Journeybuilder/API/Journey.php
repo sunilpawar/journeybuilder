@@ -11,37 +11,8 @@ class CRM_Journeybuilder_API_Journey {
    */
   public static function save($params) {
     $journeyId = $params['id'] ?? NULL;
-
-    if ($journeyId) {
-      // Update existing journey
-      $dao = new CRM_Core_DAO();
-      $dao->query("
-        UPDATE civicrm_journey_campaigns
-        SET name = %1, description = %2, configuration = %3, modified_date = NOW()
-        WHERE id = %4
-      ", [
-        1 => [$params['name'], 'String'],
-        2 => [$params['description'], 'String'],
-        3 => [json_encode($params['configuration']), 'String'],
-        4 => [$journeyId, 'Positive']
-      ]);
-    }
-    else {
-      // Create new journey
-      $dao = new CRM_Core_DAO();
-      $dao->query("
-        INSERT INTO civicrm_journey_campaigns
-        (name, description, configuration, status, created_date, created_id)
-        VALUES (%1, %2, %3, 'draft', NOW(), %4)
-      ", [
-        1 => [$params['name'], 'String'],
-        2 => [$params['description'], 'String'],
-        3 => [json_encode($params['configuration']), 'String'],
-        4 => [CRM_Core_Session::getLoggedInContactID(), 'Positive']
-      ]);
-      $journeyId = CRM_Core_DAO::singleValueQuery("SELECT LAST_INSERT_ID()");
-    }
-
+    $journeyCampaign = CRM_Journeybuilder_BAO_JourneyCampaign::create($params);
+    $journeyId = $journeyCampaign->id;
     // Save journey steps
     if (!empty($params['steps'])) {
       self::saveJourneySteps($journeyId, $params['steps']);
@@ -61,19 +32,8 @@ class CRM_Journeybuilder_API_Journey {
 
     // Insert new steps
     foreach ($steps as $index => $step) {
-      CRM_Core_DAO::executeQuery("
-        INSERT INTO civicrm_journey_steps
-        (journey_id, step_type, name, configuration, position_x, position_y, sort_order)
-        VALUES (%1, %2, %3, %4, %5, %6, %7)
-      ", [
-        1 => [$journeyId, 'Positive'],
-        2 => [$step['type'], 'String'],
-        3 => [$step['name'], 'String'],
-        4 => [json_encode($step['configuration']), 'String'],
-        5 => [$step['position']['x'], 'Float'],
-        6 => [$step['position']['y'], 'Float'],
-        7 => [$index, 'Positive']
-      ]);
+      $step['journey_id'] = $journeyId;
+      CRM_Journeybuilder_BAO_JourneyStep::create($step);
     }
   }
 

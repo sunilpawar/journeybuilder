@@ -60,8 +60,9 @@
     <type>varchar</type>
     <title>Condition Type</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Condition Type</comment>
-    <default>default</default>
+    <default>'default'</default>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::conditionType</callback>
     </pseudoconstant>

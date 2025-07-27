@@ -17,7 +17,9 @@ class CRM_Journeybuilder_BAO_JourneyStep extends CRM_Journeybuilder_DAO_JourneyS
     $className = 'CRM_Journeybuilder_DAO_JourneyStep';
     $entityName = 'JourneyStep';
     $hook = empty($params['id']) ? 'create' : 'edit';
-
+    if (!empty($params['configuration'])) {
+      $params['configuration'] = json_encode($params['configuration']);
+    }
     CRM_Utils_Hook::pre($hook, $entityName, CRM_Utils_Array::value('id', $params), $params);
     $instance = new $className();
     $instance->copyValues($params);

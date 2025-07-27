@@ -62,6 +62,7 @@
     <type>varchar</type>
     <title>Event Type</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Event Type</comment>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::eventType</callback>

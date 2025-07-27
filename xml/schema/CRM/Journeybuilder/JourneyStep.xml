@@ -36,6 +36,7 @@
     <type>varchar</type>
     <title>Step Type</title>
     <type>enum</type>
+    <length>20</length>
     <comment>step type</comment>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyStep::stepsType</callback>

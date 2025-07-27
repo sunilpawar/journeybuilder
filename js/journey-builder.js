@@ -150,14 +150,14 @@
 
       // Show template modal for new journeys
       if (!this.journeyId) {
-        $('#template-modal').modal('show');
+        this.showTemplateModal();
       }
 
       // Template selection
       $('.template-item').click(function() {
         var templateId = $(this).data('template');
         self.loadTemplate(templateId);
-        $('#template-modal').modal('hide');
+        self.hideTemplateModal();
       });
 
       // Email template selection
@@ -165,7 +165,7 @@
         var templateId = $(this).closest('.email-template-item').data('template-id');
         var templateType = $(this).closest('.email-template-item').data('template-type');
         self.assignEmailTemplate(templateId, templateType);
-        $('#email-template-modal').modal('hide');
+        self.hideEmailTemplateModal();
       });
     },
 
@@ -715,7 +715,7 @@
 
     selectEmailTemplate: function(nodeId) {
       this.currentEmailNodeId = nodeId;
-      $('#email-template-modal').modal('show');
+      this.showEmailTemplateModal();
     },
 
     assignEmailTemplate: function(templateId, templateType) {
@@ -1222,6 +1222,57 @@
         default:
           return {};
       }
+    },
+
+    // Custom modal functions to replace Bootstrap modals
+    showTemplateModal: function() {
+      var self = this;
+      $('#template-modal').show().addClass('show');
+      $('.modal-backdrop').remove();
+      $('body').append('<div class="modal-backdrop fade show"></div>').addClass('modal-open');
+      
+      // Bind close events
+      $('.modal-backdrop').one('click', function() {
+        self.hideTemplateModal();
+      });
+      
+      $(document).on('keydown.templateModal', function(e) {
+        if (e.key === 'Escape') {
+          self.hideTemplateModal();
+        }
+      });
+    },
+
+    hideTemplateModal: function() {
+      $('#template-modal').hide().removeClass('show');
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open');
+      $(document).off('keydown.templateModal');
+    },
+
+    showEmailTemplateModal: function() {
+      var self = this;
+      $('#email-template-modal').show().addClass('show');
+      $('.modal-backdrop').remove();
+      $('body').append('<div class="modal-backdrop fade show"></div>').addClass('modal-open');
+      
+      // Bind close events
+      $('.modal-backdrop').one('click', function() {
+        self.hideEmailTemplateModal();
+      });
+      
+      $(document).on('keydown.emailTemplateModal', function(e) {
+        if (e.key === 'Escape') {
+          self.hideEmailTemplateModal();
+        }
+      });
+    },
+
+    hideEmailTemplateModal: function() {
+      $('#email-template-modal').hide().removeClass('show');
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open');
+      $(document).off('keydown.emailTemplateModal');
     }
   };
 

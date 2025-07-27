@@ -24,6 +24,9 @@ class CRM_Journeybuilder_BAO_JourneyCampaign extends CRM_Journeybuilder_DAO_Jour
       $params['created_id'] = CRM_Core_Session::getLoggedInContactID();
     }
     $params['modified_date'] = date('YmdHis');
+    if (!empty($params['configuration'])) {
+      $params['configuration'] = json_encode($params['configuration']);
+    }
 
     CRM_Utils_Hook::pre($hook, $entityName, CRM_Utils_Array::value('id', $params), $params);
     $instance = new $className();

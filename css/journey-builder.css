@@ -435,6 +435,283 @@
   margin-bottom: 5px;
 }
 
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1050;
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: 0;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 1.75rem;
+  pointer-events: none;
+}
+
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 3.5rem);
+}
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  outline: 0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+  border-top-left-radius: calc(0.5rem - 1px);
+  border-top-right-radius: calc(0.5rem - 1px);
+}
+
+.modal-title {
+  margin-bottom: 0;
+  line-height: 1.5;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.75rem;
+  border-top: 1px solid #dee2e6;
+  border-bottom-right-radius: calc(0.5rem - 1px);
+  border-bottom-left-radius: calc(0.5rem - 1px);
+}
+
+.modal-footer > :not(:first-child) {
+  margin-left: 0.25rem;
+}
+
+.modal-footer > :not(:last-child) {
+  margin-right: 0.25rem;
+}
+
+.close {
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: 0.5;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+/* Modal size variants */
+.modal-sm {
+  max-width: 300px;
+}
+
+.modal-lg {
+  max-width: 800px;
+}
+
+.modal-xl {
+  max-width: 1140px;
+}
+
+/* Body class when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Connection Lines */
+#journey-svg path {
+  cursor: pointer;
+  transition: stroke-width 0.2s ease;
+}
+
+#journey-svg path:hover {
+  stroke-width: 3;
+  stroke: #007bff;
+}
+
+#journey-svg path.selected {
+  stroke: #007bff;
+  stroke-width: 3;
+}
+
+/* Arrow marker for connections */
+#journey-svg defs marker {
+  overflow: visible;
+}
+
+/* Node menu */
+.node-menu {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.journey-node:hover .node-menu {
+  opacity: 1;
+}
+
+.node-menu:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Context menu */
+.context-menu {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 160px;
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #495057;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.context-menu-item:last-child {
+  border-bottom: none;
+}
+
+.context-menu-item:hover {
+  background: #f8f9fa;
+}
+
+.context-menu-item.danger {
+  color: #dc3545;
+}
+
+.context-menu-item.danger:hover {
+  background: #f5c6cb;
+}
+
+/* Dragging states */
+.element-item.dragging {
+  opacity: 0.5;
+}
+
+.journey-node.dragging {
+  z-index: 1000;
+  transform: rotate(2deg);
+}
+
+/* Canvas loading state */
+.canvas-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Zoom controls */
+.canvas-zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.canvas-zoom-controls .btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.canvas-zoom-controls .btn:hover {
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .element-palette {
@@ -443,6 +720,10 @@
 
   .properties-panel {
     width: 280px;
+  }
+
+  .modal-dialog {
+    margin: 1rem;
   }
 }
 
@@ -464,5 +745,59 @@
 
   .journey-node {
     width: 150px;
+  }
+
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .template-grid,
+  .email-template-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .journey-minimap {
+    width: 150px;
+    height: 100px;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .canvas-zoom-controls {
+    bottom: 10px;
+    left: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .journey-builder-app {
+    background: #1a1a1a;
+    color: #e9ecef;
+  }
+
+  .journey-toolbar,
+  .element-palette,
+  .properties-panel,
+  .modal-content {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #e9ecef;
+  }
+
+  .journey-node {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #e9ecef;
+  }
+
+  .journey-canvas {
+    background:
+      radial-gradient(circle, #404040 1px, transparent 1px),
+      linear-gradient(90deg, transparent 24px, rgba(255,255,255,0.04) 25px, transparent 26px),
+      linear-gradient(rgba(255,255,255,0.04) 24px, transparent 25px, transparent 26px);
+    background-size: 25px 25px;
   }
 }

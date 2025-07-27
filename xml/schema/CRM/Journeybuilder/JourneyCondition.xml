@@ -37,6 +37,7 @@
     <type>varchar</type>
     <title>Condition Type</title>
     <type>enum</type>
+    <length>20</length>
     <comment>condition type</comment>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyCondition::conditionType</callback>
@@ -63,6 +64,7 @@
     <type>varchar</type>
     <title>Operator</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Operator type</comment>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyCondition::getAvailableOperators</callback>
@@ -90,8 +92,9 @@
     <type>varchar</type>
     <title>Logic Operator</title>
     <type>enum</type>
+    <length>20</length>
     <comment>Logic Operator</comment>
-    <default>AND</default>
+    <default>'AND'</default>
     <pseudoconstant>
       <callback>CRM_Journeybuilder_BAO_JourneyCondition::getLogicOperators</callback>
     </pseudoconstant>
