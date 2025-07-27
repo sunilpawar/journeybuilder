@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/journey/builder</path>
+    <page_callback>CRM_Journeybuilder_Page_Builder</page_callback>
+    <title>Builder</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/journey/Analytics</path>
+    <page_callback>CRM_Journeybuilder_Page_Analytics</page_callback>
+    <title>Analytics</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
