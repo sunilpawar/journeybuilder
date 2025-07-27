@@ -2,7 +2,7 @@
 
 /**
  * Journey.Save API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -55,7 +55,7 @@ function civicrm_api3_journey_save($params) {
   try {
     $result = CRM_Journeybuilder_API_Journey::save($params);
     return civicrm_api3_create_success($result, $params, 'Journey', 'save');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -63,7 +63,7 @@ function civicrm_api3_journey_save($params) {
 
 /**
  * Journey.Activate API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -88,7 +88,7 @@ function civicrm_api3_journey_activate($params) {
   try {
     $result = CRM_Journeybuilder_API_Journey::activate($params['id']);
     return civicrm_api3_create_success($result, $params, 'Journey', 'activate');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -96,7 +96,7 @@ function civicrm_api3_journey_activate($params) {
 
 /**
  * Journey.Pause API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -121,7 +121,7 @@ function civicrm_api3_journey_pause($params) {
   try {
     $result = CRM_Journeybuilder_API_Journey::pause($params['id']);
     return civicrm_api3_create_success($result, $params, 'Journey', 'pause');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -129,7 +129,7 @@ function civicrm_api3_journey_pause($params) {
 
 /**
  * Journey.Test API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -169,48 +169,7 @@ function civicrm_api3_journey_test($params) {
   try {
     $result = CRM_Journeybuilder_API_Journey::test($params);
     return civicrm_api3_create_success($result, $params, 'Journey', 'test');
-  } 
-  catch (Exception $e) {
-    throw new API_Exception($e->getMessage(), $e->getCode());
   }
-}
-
-/**
- * Journey.Process API specification
- * 
- * @param array $spec description of fields supported by this API call
- * @return void
- */
-function _civicrm_api3_journey_process_spec(&$spec) {
-  $spec['id'] = [
-    'name' => 'id',
-    'title' => 'Journey ID',
-    'description' => 'Specific Journey ID to process (optional)',
-    'type' => CRM_Utils_Type::T_INT,
-    'api.required' => 0,
-  ];
-}
-
-/**
- * Journey.Process API - Processes journey steps for active participants
- *
- * @param array $params
- * @return array API result descriptor
- * @throws API_Exception
- */
-function civicrm_api3_journey_process($params) {
-  try {
-    $journeyId = $params['id'] ?? NULL;
-    CRM_Journeybuilder_API_Journey::processJourneySteps($journeyId);
-    
-    $result = [
-      'message' => $journeyId ? 
-        "Journey {$journeyId} processed successfully" : 
-        "All active journeys processed successfully"
-    ];
-    
-    return civicrm_api3_create_success($result, $params, 'Journey', 'process');
-  } 
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -218,7 +177,7 @@ function civicrm_api3_journey_process($params) {
 
 /**
  * Journey.Get API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -257,7 +216,7 @@ function civicrm_api3_journey_get($params) {
   try {
     $result = CRM_Journeybuilder_BAO_Journey::getJourneyList($params);
     return civicrm_api3_create_success($result, $params, 'Journey', 'get');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -265,7 +224,7 @@ function civicrm_api3_journey_get($params) {
 
 /**
  * Journey.Analytics API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -299,10 +258,10 @@ function civicrm_api3_journey_analytics($params) {
     if (!empty($params['date_range'])) {
       $dateRange = json_decode($params['date_range'], TRUE);
     }
-    
+
     $result = CRM_Journeybuilder_BAO_Journey::getJourneyAnalytics($params['id'], $dateRange);
     return civicrm_api3_create_success($result, $params, 'Journey', 'analytics');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }
@@ -310,7 +269,7 @@ function civicrm_api3_journey_analytics($params) {
 
 /**
  * Journey.Duplicate API specification
- * 
+ *
  * @param array $spec description of fields supported by this API call
  * @return void
  */
@@ -341,13 +300,13 @@ function _civicrm_api3_journey_duplicate_spec(&$spec) {
 function civicrm_api3_journey_duplicate($params) {
   try {
     $newJourneyId = CRM_Journeybuilder_BAO_Journey::duplicateJourney(
-      $params['id'], 
+      $params['id'],
       $params['new_name'] ?? NULL
     );
-    
+
     $result = ['new_journey_id' => $newJourneyId];
     return civicrm_api3_create_success($result, $params, 'Journey', 'duplicate');
-  } 
+  }
   catch (Exception $e) {
     throw new API_Exception($e->getMessage(), $e->getCode());
   }

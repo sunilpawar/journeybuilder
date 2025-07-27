@@ -51,17 +51,17 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
   public static function getJourneyAnalytics($journeyId, $dateRange = NULL) {
     $whereClause = "WHERE ja.journey_id = %1";
     $params = [1 => [$journeyId, 'Positive']];
-    
+
     if ($dateRange) {
       $whereClause .= " AND ja.event_date BETWEEN %2 AND %3";
       $params[2] = [$dateRange['start'], 'String'];
       $params[3] = [$dateRange['end'], 'String'];
     }
-    
+
     // Get step performance data
     $stepAnalytics = [];
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         js.id as step_id,
         js.name as step_name,
         js.step_type,
@@ -77,27 +77,27 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       GROUP BY js.id
       ORDER BY js.sort_order
     ", $params);
-    
+
     while ($dao->fetch()) {
       $stepAnalytics[] = [
         'step_id' => $dao->step_id,
         'step_name' => $dao->step_name,
         'step_type' => $dao->step_type,
-        'entered_count' => (int) $dao->entered_count,
-        'completed_count' => (int) $dao->completed_count,
-        'emails_sent' => (int) $dao->emails_sent,
-        'emails_opened' => (int) $dao->emails_opened,
-        'emails_clicked' => (int) $dao->emails_clicked,
-        'emails_bounced' => (int) $dao->emails_bounced,
+        'entered_count' => (int)$dao->entered_count,
+        'completed_count' => (int)$dao->completed_count,
+        'emails_sent' => (int)$dao->emails_sent,
+        'emails_opened' => (int)$dao->emails_opened,
+        'emails_clicked' => (int)$dao->emails_clicked,
+        'emails_bounced' => (int)$dao->emails_bounced,
         'open_rate' => $dao->emails_sent > 0 ? round(($dao->emails_opened / $dao->emails_sent) * 100, 2) : 0,
         'click_rate' => $dao->emails_opened > 0 ? round(($dao->emails_clicked / $dao->emails_opened) * 100, 2) : 0,
-        'bounce_rate' => $dao->emails_sent > 0 ? round(($dao->emails_bounced / $dao->emails_sent) * 100, 2) : 0
+        'bounce_rate' => $dao->emails_sent > 0 ? round(($dao->emails_bounced / $dao->emails_sent) * 100, 2) : 0,
       ];
     }
-    
+
     // Get overall journey stats
     $overallStats = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         COUNT(DISTINCT jp.contact_id) as total_participants,
         COUNT(CASE WHEN jp.status = 'active' THEN 1 END) as active_participants,
         COUNT(CASE WHEN jp.status = 'completed' THEN 1 END) as completed_participants,
@@ -106,20 +106,20 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       FROM civicrm_journey_participants jp
       WHERE jp.journey_id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     $overallStats->fetch();
-    
+
     return [
       'step_analytics' => $stepAnalytics,
       'overall_stats' => [
-        'total_participants' => (int) $overallStats->total_participants,
-        'active_participants' => (int) $overallStats->active_participants,
-        'completed_participants' => (int) $overallStats->completed_participants,
-        'exited_participants' => (int) $overallStats->exited_participants,
-        'error_participants' => (int) $overallStats->error_participants,
-        'completion_rate' => $overallStats->total_participants > 0 ? 
-          round(($overallStats->completed_participants / $overallStats->total_participants) * 100, 2) : 0
-      ]
+        'total_participants' => (int)$overallStats->total_participants,
+        'active_participants' => (int)$overallStats->active_participants,
+        'completed_participants' => (int)$overallStats->completed_participants,
+        'exited_participants' => (int)$overallStats->exited_participants,
+        'error_participants' => (int)$overallStats->error_participants,
+        'completion_rate' => $overallStats->total_participants > 0 ?
+          round(($overallStats->completed_participants / $overallStats->total_participants) * 100, 2) : 0,
+      ],
     ];
   }
 
@@ -159,22 +159,22 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
     if ($dao->fetch()) {
       $sent = $dao->emails_sent ?: 1; // Prevent division by zero
       return [
-        'sent' => (int) $dao->emails_sent,
-        'opened' => (int) $dao->emails_opened,
-        'clicked' => (int) $dao->emails_clicked,
-        'bounced' => (int) $dao->emails_bounced,
-        'unsubscribed' => (int) $dao->unsubscribes,
-        'unique_recipients' => (int) $dao->unique_recipients,
+        'sent' => (int)$dao->emails_sent,
+        'opened' => (int)$dao->emails_opened,
+        'clicked' => (int)$dao->emails_clicked,
+        'bounced' => (int)$dao->emails_bounced,
+        'unsubscribed' => (int)$dao->unsubscribes,
+        'unique_recipients' => (int)$dao->unique_recipients,
         'open_rate' => round(($dao->emails_opened / $sent) * 100, 2),
         'click_rate' => round(($dao->emails_clicked / $sent) * 100, 2),
         'bounce_rate' => round(($dao->emails_bounced / $sent) * 100, 2),
-        'unsubscribe_rate' => round(($dao->unsubscribes / $sent) * 100, 2)
+        'unsubscribe_rate' => round(($dao->unsubscribes / $sent) * 100, 2),
       ];
     }
 
     return [
       'sent' => 0, 'opened' => 0, 'clicked' => 0, 'bounced' => 0, 'unsubscribed' => 0,
-      'unique_recipients' => 0, 'open_rate' => 0, 'click_rate' => 0, 'bounce_rate' => 0, 'unsubscribe_rate' => 0
+      'unique_recipients' => 0, 'open_rate' => 0, 'click_rate' => 0, 'bounce_rate' => 0, 'unsubscribe_rate' => 0,
     ];
   }
 
@@ -194,7 +194,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       ORDER BY date ASC
     ", [
       1 => [$journeyId, 'Positive'],
-      2 => [$days, 'Integer']
+      2 => [$days, 'Integer'],
     ]);
 
     $timeline = [];
@@ -202,7 +202,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       $timeline[] = [
         'date' => $dao->date,
         'event_type' => $dao->event_type,
-        'count' => (int) $dao->count
+        'count' => (int)$dao->count,
       ];
     }
 
@@ -215,7 +215,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
   public static function getConversionFunnel($journeyId) {
     $steps = [];
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         js.id,
         js.name,
         js.step_type,
@@ -223,9 +223,9 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
         COUNT(DISTINCT jp.contact_id) as participants_at_step,
         COUNT(DISTINCT CASE WHEN ja.event_type = 'completed' THEN ja.contact_id END) as completed_step
       FROM civicrm_journey_steps js
-      LEFT JOIN civicrm_journey_participants jp ON js.id = jp.current_step_id OR 
+      LEFT JOIN civicrm_journey_participants jp ON js.id = jp.current_step_id OR
         (jp.journey_id = js.journey_id AND EXISTS(
-          SELECT 1 FROM civicrm_journey_analytics ja2 
+          SELECT 1 FROM civicrm_journey_analytics ja2
           WHERE ja2.journey_id = jp.journey_id AND ja2.contact_id = jp.contact_id AND ja2.step_id = js.id
         ))
       LEFT JOIN civicrm_journey_analytics ja ON js.id = ja.step_id AND jp.contact_id = ja.contact_id
@@ -239,11 +239,11 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
         'step_id' => $dao->id,
         'step_name' => $dao->name,
         'step_type' => $dao->step_type,
-        'sort_order' => (int) $dao->sort_order,
-        'participants' => (int) $dao->participants_at_step,
-        'completed' => (int) $dao->completed_step,
-        'completion_rate' => $dao->participants_at_step > 0 ? 
-          round(($dao->completed_step / $dao->participants_at_step) * 100, 2) : 0
+        'sort_order' => (int)$dao->sort_order,
+        'participants' => (int)$dao->participants_at_step,
+        'completed' => (int)$dao->completed_step,
+        'completion_rate' => $dao->participants_at_step > 0 ?
+          round(($dao->completed_step / $dao->participants_at_step) * 100, 2) : 0,
       ];
     }
 
@@ -262,7 +262,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       GROUP BY event_type
     ", [
       1 => [$journeyId, 'Positive'],
-      2 => [$contactId, 'Positive']
+      2 => [$contactId, 'Positive'],
     ]);
 
     $weights = [
@@ -272,7 +272,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       'completed' => 10,
       'converted' => 15,
       'bounced' => -2,
-      'unsubscribed' => -5
+      'unsubscribed' => -5,
     ];
 
     while ($dao->fetch()) {
@@ -288,7 +288,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
    */
   public static function getTopPerformingSteps($journeyId, $limit = 5) {
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         js.id,
         js.name,
         js.step_type,
@@ -296,7 +296,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
         COUNT(CASE WHEN ja.event_type = 'completed' THEN 1 END) as completed,
         COUNT(CASE WHEN ja.event_type = 'email_opened' THEN 1 END) as opened,
         COUNT(CASE WHEN ja.event_type = 'email_clicked' THEN 1 END) as clicked,
-        (COUNT(CASE WHEN ja.event_type = 'completed' THEN 1 END) / 
+        (COUNT(CASE WHEN ja.event_type = 'completed' THEN 1 END) /
          NULLIF(COUNT(CASE WHEN ja.event_type = 'entered' THEN 1 END), 0)) * 100 as performance_score
       FROM civicrm_journey_steps js
       LEFT JOIN civicrm_journey_analytics ja ON js.id = ja.step_id
@@ -307,7 +307,7 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
       LIMIT %2
     ", [
       1 => [$journeyId, 'Positive'],
-      2 => [$limit, 'Integer']
+      2 => [$limit, 'Integer'],
     ]);
 
     $steps = [];
@@ -316,11 +316,11 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
         'step_id' => $dao->id,
         'step_name' => $dao->name,
         'step_type' => $dao->step_type,
-        'entered' => (int) $dao->entered,
-        'completed' => (int) $dao->completed,
-        'opened' => (int) $dao->opened,
-        'clicked' => (int) $dao->clicked,
-        'performance_score' => round($dao->performance_score, 2)
+        'entered' => (int)$dao->entered,
+        'completed' => (int)$dao->completed,
+        'opened' => (int)$dao->opened,
+        'clicked' => (int)$dao->clicked,
+        'performance_score' => round($dao->performance_score, 2),
       ];
     }
 
@@ -337,4 +337,16 @@ class CRM_Journeybuilder_BAO_JourneyAnalytics extends CRM_Journeybuilder_DAO_Jou
     ", [1 => [$daysToKeep, 'Integer']]);
   }
 
+  public static function eventType() {
+    return [
+      'entered' => 'Entered',
+      'completed' => 'Completed',
+      'email_sent' => 'Email Sent',
+      'email_opened' => 'Email Opened',
+      'email_clicked' => 'Email Clicked',
+      'bounced' => 'Bounced',
+      'unsubscribed' => 'Unsubscribed',
+      'converted' => 'Converted',
+    ];
+  }
 }

@@ -44,7 +44,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
         'operator' => $dao->operator,
         'value' => $dao->value,
         'logic_operator' => $dao->logic_operator,
-        'sort_order' => (int) $dao->sort_order
+        'sort_order' => (int)$dao->sort_order,
       ];
     }
 
@@ -56,7 +56,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
    */
   public static function evaluateConditions($stepId, $contactId) {
     $conditions = self::getStepConditions($stepId);
-    
+
     if (empty($conditions)) {
       return TRUE; // No conditions = always true
     }
@@ -65,7 +65,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     foreach ($conditions as $condition) {
       $results[] = [
         'result' => self::evaluateSingleCondition($condition, $contactId),
-        'logic' => $condition['logic_operator']
+        'logic' => $condition['logic_operator'],
       ];
     }
 
@@ -80,7 +80,8 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     try {
       $fieldValue = self::getContactFieldValue($contactId, $condition);
       return self::compareValues($fieldValue, $condition['operator'], $condition['value']);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       CRM_Core_Error::debug_log_message('Condition evaluation failed: ' . $e->getMessage());
       return FALSE;
     }
@@ -93,22 +94,22 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     switch ($condition['condition_type']) {
       case 'contact_field':
         return self::getContactField($contactId, $condition['field_name']);
-        
+
       case 'activity':
         return self::getActivityValue($contactId, $condition);
-        
+
       case 'contribution':
         return self::getContributionValue($contactId, $condition);
-        
+
       case 'membership':
         return self::getMembershipValue($contactId, $condition);
-        
+
       case 'event':
         return self::getEventValue($contactId, $condition);
-        
+
       case 'custom':
         return self::getCustomFieldValue($contactId, $condition['field_name']);
-        
+
       default:
         return NULL;
     }
@@ -120,9 +121,9 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
   private static function getContactField($contactId, $fieldName) {
     $contact = civicrm_api3('Contact', 'get', [
       'id' => $contactId,
-      'return' => [$fieldName]
+      'return' => [$fieldName],
     ]);
-    
+
     return $contact['values'][$contactId][$fieldName] ?? NULL;
   }
 
@@ -131,7 +132,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
    */
   private static function getActivityValue($contactId, $condition) {
     $fieldName = $condition['field_name'];
-    
+
     // Handle activity count
     if ($fieldName === 'activity_count') {
       return CRM_Core_DAO::singleValueQuery("
@@ -140,7 +141,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
         WHERE ac.contact_id = %1 AND a.is_deleted = 0
       ", [1 => [$contactId, 'Positive']]);
     }
-    
+
     // Handle last activity date
     if ($fieldName === 'last_activity_date') {
       return CRM_Core_DAO::singleValueQuery("
@@ -149,7 +150,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
         WHERE ac.contact_id = %1 AND a.is_deleted = 0
       ", [1 => [$contactId, 'Positive']]);
     }
-    
+
     return NULL;
   }
 
@@ -158,26 +159,26 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
    */
   private static function getContributionValue($contactId, $condition) {
     $fieldName = $condition['field_name'];
-    
+
     switch ($fieldName) {
       case 'total_amount':
         return CRM_Core_DAO::singleValueQuery("
           SELECT SUM(total_amount) FROM civicrm_contribution
           WHERE contact_id = %1 AND contribution_status_id = 1
         ", [1 => [$contactId, 'Positive']]);
-        
+
       case 'contribution_count':
         return CRM_Core_DAO::singleValueQuery("
           SELECT COUNT(*) FROM civicrm_contribution
           WHERE contact_id = %1 AND contribution_status_id = 1
         ", [1 => [$contactId, 'Positive']]);
-        
+
       case 'last_contribution_date':
         return CRM_Core_DAO::singleValueQuery("
           SELECT MAX(receive_date) FROM civicrm_contribution
           WHERE contact_id = %1 AND contribution_status_id = 1
         ", [1 => [$contactId, 'Positive']]);
-        
+
       default:
         return NULL;
     }
@@ -188,7 +189,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
    */
   private static function getMembershipValue($contactId, $condition) {
     $fieldName = $condition['field_name'];
-    
+
     switch ($fieldName) {
       case 'membership_status':
         return CRM_Core_DAO::singleValueQuery("
@@ -197,7 +198,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
           WHERE m.contact_id = %1 AND m.is_deleted = 0
           ORDER BY m.end_date DESC LIMIT 1
         ", [1 => [$contactId, 'Positive']]);
-        
+
       case 'membership_type':
         return CRM_Core_DAO::singleValueQuery("
           SELECT mt.name FROM civicrm_membership m
@@ -205,7 +206,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
           WHERE m.contact_id = %1 AND m.is_deleted = 0
           ORDER BY m.end_date DESC LIMIT 1
         ", [1 => [$contactId, 'Positive']]);
-        
+
       default:
         return NULL;
     }
@@ -216,14 +217,14 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
    */
   private static function getEventValue($contactId, $condition) {
     $fieldName = $condition['field_name'];
-    
+
     if ($fieldName === 'event_participation_count') {
       return CRM_Core_DAO::singleValueQuery("
         SELECT COUNT(*) FROM civicrm_participant
         WHERE contact_id = %1 AND is_deleted = 0
       ", [1 => [$contactId, 'Positive']]);
     }
-    
+
     return NULL;
   }
 
@@ -236,11 +237,12 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     try {
       $result = civicrm_api3('Contact', 'get', [
         'id' => $contactId,
-        'return' => [$fieldName]
+        'return' => [$fieldName],
       ]);
-      
+
       return $result['values'][$contactId][$fieldName] ?? NULL;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       return NULL;
     }
   }
@@ -252,28 +254,28 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     switch ($operator) {
       case 'equals':
         return $fieldValue == $compareValue;
-        
+
       case 'not_equals':
         return $fieldValue != $compareValue;
-        
+
       case 'contains':
         return strpos($fieldValue, $compareValue) !== FALSE;
-        
+
       case 'not_contains':
         return strpos($fieldValue, $compareValue) === FALSE;
-        
+
       case 'greater_than':
         return $fieldValue > $compareValue;
-        
+
       case 'less_than':
         return $fieldValue < $compareValue;
-        
+
       case 'is_null':
         return empty($fieldValue);
-        
+
       case 'is_not_null':
         return !empty($fieldValue);
-        
+
       default:
         return FALSE;
     }
@@ -286,20 +288,21 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
     if (empty($results)) {
       return TRUE;
     }
-    
+
     $finalResult = $results[0]['result'];
-    
+
     for ($i = 1; $i < count($results); $i++) {
       $logic = $results[$i - 1]['logic'] ?? 'AND';
       $currentResult = $results[$i]['result'];
-      
+
       if ($logic === 'OR') {
         $finalResult = $finalResult || $currentResult;
-      } else { // AND
+      }
+      else { // AND
         $finalResult = $finalResult && $currentResult;
       }
     }
-    
+
     return $finalResult;
   }
 
@@ -309,7 +312,7 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
   public static function saveStepConditions($stepId, $conditions) {
     // Delete existing conditions
     CRM_Core_DAO::executeQuery("DELETE FROM civicrm_journey_conditions WHERE step_id = %1", [
-      1 => [$stepId, 'Positive']
+      1 => [$stepId, 'Positive'],
     ]);
 
     // Insert new conditions
@@ -347,31 +350,31 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
           'state_province_id' => E::ts('State/Province'),
           'country_id' => E::ts('Country'),
         ];
-        
+
       case 'activity':
         return [
           'activity_count' => E::ts('Activity Count'),
           'last_activity_date' => E::ts('Last Activity Date'),
         ];
-        
+
       case 'contribution':
         return [
           'total_amount' => E::ts('Total Contribution Amount'),
           'contribution_count' => E::ts('Contribution Count'),
           'last_contribution_date' => E::ts('Last Contribution Date'),
         ];
-        
+
       case 'membership':
         return [
           'membership_status' => E::ts('Membership Status'),
           'membership_type' => E::ts('Membership Type'),
         ];
-        
+
       case 'event':
         return [
           'event_participation_count' => E::ts('Event Participation Count'),
         ];
-        
+
       default:
         return [];
     }
@@ -391,6 +394,24 @@ class CRM_Journeybuilder_BAO_JourneyCondition extends CRM_Journeybuilder_DAO_Jou
       'is_null' => E::ts('Is Empty'),
       'is_not_null' => E::ts('Is Not Empty'),
     ];
+  }
+
+  /**
+   * Get available condition types
+   */
+  public static function conditionType() {
+    return [
+      'contact_field' => 'Contact Field',
+      'activity' => 'Activity',
+      'contribution' => 'Contribution',
+      'membership' => 'Membership',
+      'event' => 'Event',
+      'custom' => 'Custom',
+    ];
+  }
+
+  public static function getLogicOperators() {
+    return ['AND' => E::ts('AND'), 'OR' => E::ts('OR')];
   }
 
 }

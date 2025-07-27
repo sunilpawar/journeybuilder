@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyAnalytics</class>
+  <name>civicrm_journey_analytics</name>
+  <comment>Journey Analytics</comment>
+  <log>false</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyAnalytics ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>journey_id</name>
+    <type>int unsigned</type>
+    <comment>FK to journey</comment>
+  </field>
+  <foreignKey>
+    <name>journey_id</name>
+    <table>civicrm_journey_campaigns</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>step_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Steps</comment>
+  </field>
+  <foreignKey>
+    <name>step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>contact_id</name>
+    <type>int unsigned</type>
+    <title>Contact</title>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>cotact_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>event_type</name>
+    <type>varchar</type>
+    <title>Event Type</title>
+    <type>enum</type>
+    <comment>Event Type</comment>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::eventType</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>event_data</name>
+    <title>Event Data</title>
+    <type>longtext</type>
+    <comment>Event Data.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>event_date</name>
+    <title>Event Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/Event(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <index>
+    <name>idx_journey_contact_date</name>
+    <fieldName>journey_id</fieldName>
+    <fieldName>contact_id</fieldName>
+    <fieldName>event_date</fieldName>
+  </index>
+  <index>
+    <name>idx_event_type_date</name>
+    <fieldName>event_type</fieldName>
+    <fieldName>event_date</fieldName>
+  </index>
+</table>

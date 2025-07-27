@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyCondition</class>
+  <name>civicrm_journey_conditions</name>
+  <comment>Journey Condition</comment>
+  <log>false</log>
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyCondition ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>step_id</name>
+    <type>int unsigned</type>
+    <title>Step</title>
+    <comment>FK to step</comment>
+  </field>
+  <foreignKey>
+    <name>step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>condition_type</name>
+    <type>varchar</type>
+    <title>Condition Type</title>
+    <type>enum</type>
+    <comment>condition type</comment>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyCondition::conditionType</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>field_name</name>
+    <title>Field Name</title>
+    <type>varchar</type>
+    <length>255</length>
+    <export>true</export>
+    <import>true</import>
+    <add>1.0</add>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+  <field>
+    <name>operator</name>
+    <type>varchar</type>
+    <title>Operator</title>
+    <type>enum</type>
+    <comment>Operator type</comment>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyCondition::getAvailableOperators</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>value</name>
+    <title>Value</title>
+    <type>text</type>
+    <comment>value.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>logic_operator</name>
+    <type>varchar</type>
+    <title>Logic Operator</title>
+    <type>enum</type>
+    <comment>Logic Operator</comment>
+    <default>AND</default>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyCondition::getLogicOperators</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>sort_order</name>
+    <type>int unsigned</type>
+    <comment>Sort Order</comment>
+    <html>
+      <type>Number</type>
+      <label>Sort Order</label>
+    </html>
+  </field>
+
+  <field>
+    <name>contact_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>contact_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+</table>

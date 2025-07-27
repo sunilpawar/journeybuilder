@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyParticipant</class>
+  <name>civicrm_journey_participants</name>
+  <comment>Journey Participant</comment>
+  <log>false</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyParticipant ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+  <field>
+    <name>journey_id</name>
+    <type>int unsigned</type>
+    <title>Journey</title>
+    <comment>FK to journey</comment>
+  </field>
+  <foreignKey>
+    <name>journey_id</name>
+    <table>civicrm_journey_campaigns</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>contact_id</name>
+    <type>int unsigned</type>
+    <title>Contact</title>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>contact_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>current_step_id</name>
+    <type>int unsigned</type>
+    <title>Current Step</title>
+    <comment>FK to Steps</comment>
+  </field>
+  <foreignKey>
+    <name>current_step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+  <field>
+    <name>status</name>
+    <type>varchar</type>
+    <title>Status</title>
+    <type>enum</type>
+    <comment>Status Operator</comment>
+    <default>active</default>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyParticipant::getStatusOptions</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>entered_date</name>
+    <title>Entered Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/entered(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <field>
+    <name>completed_date</name>
+    <title>Completed Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/completed(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <field>
+    <name>last_action_date</name>
+    <title>Last Action Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/last_action(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <index>
+    <name>idx_participant_status</name>
+    <fieldName>status</fieldName>
+  </index>
+  <index>
+    <name>unique_journey_contact</name>
+    <fieldName>journey_id</fieldName>
+    <fieldName>contact_id</fieldName>
+    <unique>true</unique>
+    <add>1.o</add>
+  </index>
+  <index>
+    <name>idx_journey_status_date</name>
+    <fieldName>journey_id</fieldName>
+    <fieldName>status</fieldName>
+    <fieldName>last_action_date</fieldName>
+    <add>1.o</add>
+  </index>
+
+</table>

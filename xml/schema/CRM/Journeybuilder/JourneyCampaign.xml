@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyCampaign</class>
+  <name>civicrm_journey_campaigns</name>
+  <comment>Journey Campaign</comment>
+  <log>false</log>
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyCampaign ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+  <field>
+    <name>name</name>
+    <title>Campaign Name</title>
+    <type>varchar</type>
+    <length>255</length>
+    <required>true</required>
+    <export>true</export>
+    <import>true</import>
+    <add>1.0</add>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+  <field>
+    <name>description</name>
+    <title>Description</title>
+    <type>text</type>
+    <comment>Description.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>configuration</name>
+    <title>Configuration</title>
+    <type>longtext</type>
+    <comment>Configuration.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>status</name>
+    <type>varchar</type>
+    <title>Status</title>
+    <type>enum</type>
+    <comment>Campaign status</comment>
+    <default>draft</default>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::campaignStatus</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>created_date</name>
+    <title>Created Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/create(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <field>
+    <name>modified_date</name>
+    <title>Modified Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/modified(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <field>
+    <name>activated_date</name>
+    <title>Activated Date</title>
+    <type>datetime</type>
+    <import>true</import>
+    <headerPattern>/activated(.?date)?/i</headerPattern>
+    <dataPattern>/^\d{4}-?\d{2}-?\d{2} ?(\d{2}:?\d{2}:?(\d{2})?)?$/</dataPattern>
+    <html>
+      <type>Select Date</type>
+      <formatType>activityDateTime</formatType>
+    </html>
+  </field>
+  <field>
+    <name>created_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>created_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+  <index>
+    <name>idx_journey_status</name>
+    <fieldName>status</fieldName>
+  </index>
+</table>

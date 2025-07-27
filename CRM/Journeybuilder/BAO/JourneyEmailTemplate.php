@@ -30,7 +30,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
   public static function getStepEmailTemplate($stepId) {
     $template = new CRM_Journeybuilder_DAO_JourneyEmailTemplate();
     $template->step_id = $stepId;
-    
+
     if ($template->find(TRUE)) {
       return [
         'id' => $template->id,
@@ -43,7 +43,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         'ab_test_config' => json_decode($template->ab_test_config, TRUE) ?: []
       ];
     }
-    
+
     return NULL;
   }
 
@@ -53,17 +53,18 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
   public static function saveStepEmailTemplate($stepId, $templateData) {
     $template = new CRM_Journeybuilder_DAO_JourneyEmailTemplate();
     $template->step_id = $stepId;
-    
+
     if ($template->find(TRUE)) {
       // Update existing template
       $template->copyValues($templateData);
-    } else {
+    }
+    else {
       // Create new template
       $template = new CRM_Journeybuilder_DAO_JourneyEmailTemplate();
       $template->step_id = $stepId;
       $template->copyValues($templateData);
     }
-    
+
     // Encode JSON fields
     if (isset($templateData['personalization_rules'])) {
       $template->personalization_rules = json_encode($templateData['personalization_rules']);
@@ -71,7 +72,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
     if (isset($templateData['ab_test_config'])) {
       $template->ab_test_config = json_encode($templateData['ab_test_config']);
     }
-    
+
     $template->save();
     return $template->id;
   }
@@ -99,14 +100,14 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
 
     // Personalize subject
     $subject = self::personalizeContent($template['subject'], $contactData, $template['personalization_rules']);
-    
+
     // Personalize HTML content
     $htmlContent = $template['html_content'];
     if ($template['mosaico_template_id']) {
       $htmlContent = self::renderMosaicoTemplate($template['mosaico_template_id'], $contactData);
     }
     $htmlContent = self::personalizeContent($htmlContent, $contactData, $template['personalization_rules']);
-    
+
     // Personalize text content
     $textContent = self::personalizeContent($template['text_content'], $contactData, $template['personalization_rules']);
 
@@ -123,7 +124,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
    */
   private static function getABTestVariant($template, $variant) {
     $abConfig = $template['ab_test_config'];
-    
+
     if ($variant === 'B' && !empty($abConfig['variant_b'])) {
       // Override with variant B content
       if (!empty($abConfig['variant_b']['subject'])) {
@@ -136,7 +137,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         $template['text_content'] = $abConfig['variant_b']['text_content'];
       }
     }
-    
+
     return $template;
   }
 
@@ -162,7 +163,8 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
       foreach ($personalizationRules as $rule) {
         if ($rule['type'] === 'conditional_content') {
           $content = self::applyConditionalContent($content, $contactData, $rule);
-        } elseif ($rule['type'] === 'dynamic_content') {
+        }
+        elseif ($rule['type'] === 'dynamic_content') {
           $content = self::applyDynamicContent($content, $contactData, $rule);
         }
       }
@@ -184,10 +186,10 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
     $field = $condition['field'] ?? '';
     $operator = $condition['operator'] ?? 'equals';
     $value = $condition['value'] ?? '';
-    
+
     $fieldValue = $contactData[$field] ?? '';
     $matches = FALSE;
-    
+
     switch ($operator) {
       case 'equals':
         $matches = $fieldValue == $value;
@@ -205,10 +207,10 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         $matches = !empty($fieldValue);
         break;
     }
-    
+
     $token = $rule['token'] ?? '';
     $replacement = $matches ? ($rule['true_content'] ?? '') : ($rule['false_content'] ?? '');
-    
+
     return str_replace($token, $replacement, $content);
   }
 
@@ -218,7 +220,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
   private static function applyDynamicContent($content, $contactData, $rule) {
     $token = $rule['token'] ?? '';
     $dynamicContent = '';
-    
+
     switch ($rule['content_type']) {
       case 'recent_contributions':
         $dynamicContent = self::getRecentContributions($contactData['id'] ?? 0, $rule['limit'] ?? 3);
@@ -230,7 +232,7 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         $dynamicContent = self::getMembershipInfo($contactData['id'] ?? 0);
         break;
     }
-    
+
     return str_replace($token, $dynamicContent, $content);
   }
 
@@ -242,7 +244,8 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
       // This would integrate with Mosaico extension
       // For now, return a placeholder
       return '<p>Mosaico template ' . $templateId . ' would be rendered here with contact data.</p>';
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       CRM_Core_Error::debug_log_message('Error rendering Mosaico template: ' . $e->getMessage());
       return '<p>Error rendering email template</p>';
     }
@@ -252,8 +255,10 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
    * Get recent contributions for dynamic content
    */
   private static function getRecentContributions($contactId, $limit = 3) {
-    if (!$contactId) return '';
-    
+    if (!$contactId) {
+      return '';
+    }
+
     try {
       $contributions = civicrm_api3('Contribution', 'get', [
         'contact_id' => $contactId,
@@ -264,16 +269,17 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         ],
         'return' => ['total_amount', 'receive_date', 'financial_type_id']
       ]);
-      
+
       $html = '<ul>';
       foreach ($contributions['values'] as $contribution) {
-        $html .= '<li>$' . number_format($contribution['total_amount'], 2) . 
-                 ' on ' . date('M j, Y', strtotime($contribution['receive_date'])) . '</li>';
+        $html .= '<li>$' . number_format($contribution['total_amount'], 2) .
+          ' on ' . date('M j, Y', strtotime($contribution['receive_date'])) . '</li>';
       }
       $html .= '</ul>';
-      
+
       return $html;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       return '';
     }
   }
@@ -282,8 +288,10 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
    * Get upcoming events for dynamic content
    */
   private static function getUpcomingEvents($contactId, $limit = 3) {
-    if (!$contactId) return '';
-    
+    if (!$contactId) {
+      return '';
+    }
+
     try {
       $participants = civicrm_api3('Participant', 'get', [
         'contact_id' => $contactId,
@@ -293,16 +301,17 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
         ],
         'return' => ['event_id.title', 'event_id.start_date', 'event_id.event_type_id']
       ]);
-      
+
       $html = '<ul>';
       foreach ($participants['values'] as $participant) {
-        $html .= '<li>' . $participant['event_id.title'] . 
-                 ' on ' . date('M j, Y', strtotime($participant['event_id.start_date'])) . '</li>';
+        $html .= '<li>' . $participant['event_id.title'] .
+          ' on ' . date('M j, Y', strtotime($participant['event_id.start_date'])) . '</li>';
       }
       $html .= '</ul>';
-      
+
       return $html;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       return '';
     }
   }
@@ -311,22 +320,25 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
    * Get membership info for dynamic content
    */
   private static function getMembershipInfo($contactId) {
-    if (!$contactId) return '';
-    
+    if (!$contactId) {
+      return '';
+    }
+
     try {
       $memberships = civicrm_api3('Membership', 'get', [
         'contact_id' => $contactId,
         'is_current_member' => 1,
         'return' => ['membership_type_id', 'status_id', 'end_date']
       ]);
-      
+
       if (empty($memberships['values'])) {
         return 'No current membership';
       }
-      
+
       $membership = reset($memberships['values']);
       return 'Your membership expires on ' . date('M j, Y', strtotime($membership['end_date']));
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       return '';
     }
   }
@@ -337,13 +349,13 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
   public static function sendTemplateEmail($stepId, $contactId, $variant = 'A') {
     try {
       $renderedTemplate = self::renderTemplate($stepId, $contactId, $variant);
-      
+
       // Get contact email
       $contact = civicrm_api3('Contact', 'get', [
         'id' => $contactId,
         'return' => ['email', 'display_name']
       ]);
-      
+
       $contactData = $contact['values'][$contactId] ?? [];
       if (empty($contactData['email'])) {
         throw new Exception('Contact has no email address');
@@ -358,7 +370,8 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
       ]);
 
       return $result['id'] ?? TRUE;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       CRM_Core_Error::debug_log_message('Error sending template email: ' . $e->getMessage());
       throw $e;
     }
@@ -410,7 +423,8 @@ class CRM_Journeybuilder_BAO_JourneyEmailTemplate extends CRM_Journeybuilder_DAO
           'category' => $template['category'] ?? 'general'
         ];
       }
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       // Mosaico extension might not be installed
       CRM_Core_Error::debug_log_message('Could not load Mosaico templates: ' . $e->getMessage());
     }

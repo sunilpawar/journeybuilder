@@ -1,5 +1,9 @@
 <?php
 
+use CRM_Journeybuilder_ExtensionUtil as E;
+/**
+ * Journey Builder API for managing journeys, steps, and participants.
+ */
 class CRM_Journeybuilder_API_Journey {
 
   /**
@@ -21,7 +25,8 @@ class CRM_Journeybuilder_API_Journey {
         3 => [json_encode($params['configuration']), 'String'],
         4 => [$journeyId, 'Positive']
       ]);
-    } else {
+    }
+    else {
       // Create new journey
       $dao = new CRM_Core_DAO();
       $dao->query("
@@ -147,27 +152,27 @@ class CRM_Journeybuilder_API_Journey {
    */
   private static function getContactsForEntry($criteria) {
     $contactIds = [];
-    
+
     if (empty($criteria)) {
       return $contactIds;
     }
-    
+
     foreach ($criteria as $nodeId => $criterion) {
       $config = $criterion['configuration'] ?? [];
-      
+
       switch ($criterion['type']) {
         case 'entry-form':
           if (!empty($config['form_id'])) {
             $contactIds = array_merge($contactIds, self::getContactsFromForm($config));
           }
           break;
-          
+
         case 'entry-manual':
           if (!empty($config['contact_ids'])) {
             $contactIds = array_merge($contactIds, $config['contact_ids']);
           }
           break;
-          
+
         case 'entry-event':
           if (!empty($config['event_id'])) {
             $contactIds = array_merge($contactIds, self::getContactsFromEvent($config));
@@ -175,47 +180,47 @@ class CRM_Journeybuilder_API_Journey {
           break;
       }
     }
-    
+
     return array_unique($contactIds);
   }
-  
+
   private static function getContactsFromForm($config) {
     $contactIds = [];
     $formId = $config['form_id'];
-    $newContactsOnly = $config['new_contacts_only'] ?? false;
-    
+    $newContactsOnly = $config['new_contacts_only'] ?? FALSE;
+
     $sql = "SELECT DISTINCT contact_id FROM civicrm_activity_contact ac
             INNER JOIN civicrm_activity a ON ac.activity_id = a.id
             WHERE a.activity_type_id = (SELECT id FROM civicrm_option_value WHERE option_group_id = 2 AND name = 'Webform Submission')
             AND a.source_record_id = %1";
-    
+
     $params = [1 => [$formId, 'Positive']];
-    
+
     if ($newContactsOnly) {
       $sql .= " AND a.activity_date_time >= DATE_SUB(NOW(), INTERVAL 1 DAY)";
     }
-    
+
     $dao = CRM_Core_DAO::executeQuery($sql, $params);
     while ($dao->fetch()) {
       $contactIds[] = $dao->contact_id;
     }
-    
+
     return $contactIds;
   }
-  
+
   private static function getContactsFromEvent($config) {
     $contactIds = [];
     $eventId = $config['event_id'];
-    
+
     $dao = CRM_Core_DAO::executeQuery(
       "SELECT DISTINCT contact_id FROM civicrm_participant WHERE event_id = %1 AND status_id IN (1, 2)",
       [1 => [$eventId, 'Positive']]
     );
-    
+
     while ($dao->fetch()) {
       $contactIds[] = $dao->contact_id;
     }
-    
+
     return $contactIds;
   }
 
@@ -241,19 +246,19 @@ class CRM_Journeybuilder_API_Journey {
         2 => [$contactId, 'Positive'],
         3 => [$firstStep, 'Positive']
       ]);
-      
+
       // Log analytics event
       self::logAnalyticsEvent($journeyId, $firstStep, $contactId, 'entered');
     }
   }
-  
+
   /**
    * Process journey steps for active participants
    */
   public static function processJourneySteps($journeyId = NULL) {
     $whereClause = $journeyId ? "AND jc.id = %1" : "";
     $params = $journeyId ? [1 => [$journeyId, 'Positive']] : [];
-    
+
     $dao = CRM_Core_DAO::executeQuery("
       SELECT jp.*, js.step_type, js.configuration, js.name as step_name
       FROM civicrm_journey_participants jp
@@ -262,39 +267,39 @@ class CRM_Journeybuilder_API_Journey {
       WHERE jp.status = 'active' AND jc.status = 'active' {$whereClause}
       ORDER BY jp.last_action_date ASC
     ", $params);
-    
+
     while ($dao->fetch()) {
       self::processParticipantStep($dao);
     }
   }
-  
-  private static function processParticipantStep($participant) {
+
+  public static function processParticipantStep($participant) {
     $stepConfig = json_decode($participant->configuration, TRUE) ?: [];
-    
+
     switch ($participant->step_type) {
       case 'action-email':
         self::processEmailStep($participant, $stepConfig);
         break;
-        
+
       case 'wait':
         self::processWaitStep($participant, $stepConfig);
         break;
-        
+
       case 'condition':
         self::processConditionStep($participant, $stepConfig);
         break;
-        
+
       case 'action-update':
         self::processUpdateStep($participant, $stepConfig);
         break;
     }
   }
-  
+
   private static function processEmailStep($participant, $config) {
     if (empty($config['template_id'])) {
       return;
     }
-    
+
     try {
       // Send email using CiviCRM API
       $result = civicrm_api3('Email', 'send', [
@@ -302,7 +307,7 @@ class CRM_Journeybuilder_API_Journey {
         'template_id' => $config['template_id'],
         'subject' => $config['subject'] ?? 'Journey Email',
       ]);
-      
+
       // Log analytics
       self::logAnalyticsEvent(
         $participant->journey_id,
@@ -311,20 +316,21 @@ class CRM_Journeybuilder_API_Journey {
         'email_sent',
         ['email_id' => $result['id']]
       );
-      
+
       // Move to next step
       self::moveToNextStep($participant);
-      
-    } catch (Exception $e) {
+
+    }
+    catch (Exception $e) {
       CRM_Core_Error::debug_log_message('Journey email send failed: ' . $e->getMessage());
       self::markParticipantError($participant->id, $e->getMessage());
     }
   }
-  
+
   private static function processWaitStep($participant, $config) {
     $waitType = $config['wait_type'] ?? 'duration';
     $canProceed = FALSE;
-    
+
     switch ($waitType) {
       case 'duration':
         $duration = $config['duration'] ?? 1;
@@ -332,55 +338,57 @@ class CRM_Journeybuilder_API_Journey {
         $waitUntil = date('Y-m-d H:i:s', strtotime("+{$duration} {$unit}", strtotime($participant->last_action_date)));
         $canProceed = (date('Y-m-d H:i:s') >= $waitUntil);
         break;
-        
+
       case 'date':
         $waitDate = $config['wait_date'] ?? NULL;
         $canProceed = $waitDate && (date('Y-m-d H:i:s') >= $waitDate);
         break;
     }
-    
+
     if ($canProceed) {
       self::moveToNextStep($participant);
     }
   }
-  
+
   private static function processConditionStep($participant, $config) {
     $conditionMet = self::evaluateCondition($participant->contact_id, $config);
-    
+
     // Find appropriate next step based on condition result
     $nextStepId = self::getConditionalNextStep($participant->current_step_id, $conditionMet);
-    
+
     if ($nextStepId) {
       self::moveParticipantToStep($participant->id, $nextStepId);
-    } else {
+    }
+    else {
       // No valid path, exit journey
       self::exitParticipant($participant->id);
     }
   }
-  
+
   private static function evaluateCondition($contactId, $config) {
     $conditionType = $config['condition_type'] ?? 'contact_field';
     $field = $config['field'] ?? 'email';
     $operator = $config['operator'] ?? 'is_not_null';
     $value = $config['value'] ?? '';
-    
+
     try {
       $contact = civicrm_api3('Contact', 'get', [
         'id' => $contactId,
         'return' => [$field]
       ]);
-      
+
       if (!empty($contact['values'][$contactId])) {
         $fieldValue = $contact['values'][$contactId][$field] ?? NULL;
         return self::compareValues($fieldValue, $operator, $value);
       }
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
       CRM_Core_Error::debug_log_message('Condition evaluation failed: ' . $e->getMessage());
     }
-    
+
     return FALSE;
   }
-  
+
   private static function compareValues($fieldValue, $operator, $compareValue) {
     switch ($operator) {
       case 'equals':
@@ -403,16 +411,17 @@ class CRM_Journeybuilder_API_Journey {
         return FALSE;
     }
   }
-  
+
   private static function moveToNextStep($participant) {
     $nextStepId = self::getNextStep($participant->current_step_id);
     if ($nextStepId) {
       self::moveParticipantToStep($participant->id, $nextStepId);
-    } else {
+    }
+    else {
       self::completeParticipant($participant->id);
     }
   }
-  
+
   private static function getNextStep($currentStepId) {
     // This would use connection data to find next step
     // For now, get next step by sort order
@@ -423,7 +432,7 @@ class CRM_Journeybuilder_API_Journey {
       ORDER BY sort_order LIMIT 1
     ", [1 => [$currentStepId, 'Positive']]);
   }
-  
+
   private static function moveParticipantToStep($participantId, $stepId) {
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
@@ -434,7 +443,7 @@ class CRM_Journeybuilder_API_Journey {
       2 => [$participantId, 'Positive']
     ]);
   }
-  
+
   private static function completeParticipant($participantId) {
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
@@ -442,7 +451,7 @@ class CRM_Journeybuilder_API_Journey {
       WHERE id = %1
     ", [1 => [$participantId, 'Positive']]);
   }
-  
+
   private static function exitParticipant($participantId) {
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
@@ -450,7 +459,7 @@ class CRM_Journeybuilder_API_Journey {
       WHERE id = %1
     ", [1 => [$participantId, 'Positive']]);
   }
-  
+
   private static function markParticipantError($participantId, $errorMessage) {
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
@@ -458,7 +467,7 @@ class CRM_Journeybuilder_API_Journey {
       WHERE id = %1
     ", [1 => [$participantId, 'Positive']]);
   }
-  
+
   private static function logAnalyticsEvent($journeyId, $stepId, $contactId, $eventType, $eventData = []) {
     CRM_Core_DAO::executeQuery("
       INSERT INTO civicrm_journey_analytics
@@ -472,7 +481,7 @@ class CRM_Journeybuilder_API_Journey {
       5 => [json_encode($eventData), 'String']
     ]);
   }
-  
+
   /**
    * Test journey execution
    */
@@ -480,15 +489,15 @@ class CRM_Journeybuilder_API_Journey {
     $journeyId = $params['id'];
     $contactId = $params['contact_id'];
     $mode = $params['mode'] ?? 'simulation';
-    
+
     $results = [
       'steps' => [],
       'mode' => $mode
     ];
-    
+
     // Get journey steps
     $steps = self::getJourneySteps($journeyId);
-    
+
     foreach ($steps as $step) {
       $stepResult = [
         'name' => $step['name'],
@@ -496,24 +505,25 @@ class CRM_Journeybuilder_API_Journey {
         'success' => TRUE,
         'message' => 'Step would execute successfully'
       ];
-      
+
       if ($mode === 'live') {
         // Actually execute the step
         try {
           self::executeTestStep($step, $contactId);
           $stepResult['message'] = 'Step executed successfully';
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
           $stepResult['success'] = FALSE;
           $stepResult['message'] = 'Step failed: ' . $e->getMessage();
         }
       }
-      
+
       $results['steps'][] = $stepResult;
     }
-    
+
     return $results;
   }
-  
+
   private static function getJourneySteps($journeyId) {
     $steps = [];
     $dao = CRM_Core_DAO::executeQuery("
@@ -521,7 +531,7 @@ class CRM_Journeybuilder_API_Journey {
       WHERE journey_id = %1
       ORDER BY sort_order
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     while ($dao->fetch()) {
       $steps[] = [
         'id' => $dao->id,
@@ -530,10 +540,10 @@ class CRM_Journeybuilder_API_Journey {
         'configuration' => json_decode($dao->configuration, TRUE)
       ];
     }
-    
+
     return $steps;
   }
-  
+
   private static function executeTestStep($step, $contactId) {
     // Simplified test execution
     switch ($step['step_type']) {
@@ -542,7 +552,7 @@ class CRM_Journeybuilder_API_Journey {
           throw new Exception('No email template configured');
         }
         break;
-        
+
       case 'condition':
         $result = self::evaluateCondition($contactId, $step['configuration']);
         if (!$result) {
@@ -551,7 +561,7 @@ class CRM_Journeybuilder_API_Journey {
         break;
     }
   }
-  
+
   /**
    * Pause journey
    */
@@ -561,14 +571,14 @@ class CRM_Journeybuilder_API_Journey {
       SET status = 'paused', modified_date = NOW()
       WHERE id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     // Pause all active participants
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
       SET status = 'paused'
       WHERE journey_id = %1 AND status = 'active'
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     return ['success' => TRUE];
   }
 }

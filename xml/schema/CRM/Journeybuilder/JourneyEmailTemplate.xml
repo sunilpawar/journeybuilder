@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyEmailTemplate</class>
+  <name>civicrm_journey_email_templates</name>
+  <comment>Journey Email Template</comment>
+  <log>false</log>
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyEmailTemplate ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+  <field>
+    <name>step_id</name>
+    <type>int unsigned</type>
+    <title>Step</title>
+    <comment>FK to Steps</comment>
+  </field>
+  <foreignKey>
+    <name>step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>mosaico_template_id</name>
+    <type>int unsigned</type>
+    <title>Mosaico template</title>
+    <comment>Mosaico template ID</comment>
+  </field>
+  <field>
+    <name>subject</name>
+    <title>Subject</title>
+    <type>varchar</type>
+    <length>255</length>
+    <required>true</required>
+    <export>true</export>
+    <import>true</import>
+    <add>1.0</add>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+  <field>
+    <name>html_content</name>
+    <title>Html Content</title>
+    <type>longtext</type>
+    <comment>Html Content.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>text_content</name>
+    <title>Text Content</title>
+    <type>longtext</type>
+    <comment>text content.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>personalization_rules</name>
+    <title>Personalization Rules</title>
+    <type>longtext</type>
+    <comment>personalization rules.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>ab_test_config</name>
+    <title>AB Test Config</title>
+    <type>longtext</type>
+    <comment>ab test config.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+</table>

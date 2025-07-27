@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Journeybuilder</base>
+  <class>JourneyConnection</class>
+  <name>civicrm_journey_connections</name>
+  <comment>Journey Connection</comment>
+  <log>false</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique JourneyConnection ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+  <field>
+    <name>journey_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>journey_id</name>
+    <table>civicrm_journey_campaigns</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>from_step_id</name>
+    <type>int unsigned</type>
+    <title>From Step</title>
+    <comment>FK to Steps</comment>
+  </field>
+  <foreignKey>
+    <name>from_step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>to_step_id</name>
+    <type>int unsigned</type>
+    <title>To Step</title>
+    <comment>FK to Steps</comment>
+  </field>
+  <foreignKey>
+    <name>to_step_id</name>
+    <table>civicrm_journey_steps</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+  <field>
+    <name>condition_type</name>
+    <type>varchar</type>
+    <title>Condition Type</title>
+    <type>enum</type>
+    <comment>Condition Type</comment>
+    <default>default</default>
+    <pseudoconstant>
+      <callback>CRM_Journeybuilder_BAO_JourneyAnalytics::conditionType</callback>
+    </pseudoconstant>
+    <add>1.0</add>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+  <field>
+    <name>condition_value</name>
+    <title>Condition Value</title>
+    <type>text</type>
+    <comment>Condition Value.</comment>
+    <html>
+      <type>TextArea</type>
+      <rows>4</rows>
+      <cols>60</cols>
+    </html>
+    <import>true</import>
+    <add>1.0</add>
+  </field>
+  <field>
+    <name>percentage</name>
+    <type>decimal</type>
+    <default>NULL</default>
+    <import>true</import>
+    <dataPattern>/^\d+(\.\d{2})?$/</dataPattern>
+    <comment>percentage</comment>
+    <html>
+      <type>Number</type>
+      <label>Percentage</label>
+    </html>
+  </field>
+  <field>
+    <name>sort_order</name>
+    <type>int unsigned</type>
+    <comment>Sort Order</comment>
+    <html>
+      <type>Number</type>
+      <label>Sort Order</label>
+    </html>
+  </field>
+</table>

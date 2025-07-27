@@ -1,6 +1,8 @@
 <?php
 
-class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
+use CRM_Journeybuilder_ExtensionUtil as E;
+
+class CRM_Journeybuilder_BAO_Journey {
 
   /**
    * Get journey analytics data
@@ -8,17 +10,17 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
   public static function getJourneyAnalytics($journeyId, $dateRange = NULL) {
     $whereClause = "WHERE ja.journey_id = %1";
     $params = [1 => [$journeyId, 'Positive']];
-    
+
     if ($dateRange) {
       $whereClause .= " AND ja.event_date BETWEEN %2 AND %3";
       $params[2] = [$dateRange['start'], 'String'];
       $params[3] = [$dateRange['end'], 'String'];
     }
-    
+
     // Get step performance data
     $stepAnalytics = [];
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         js.id as step_id,
         js.name as step_name,
         js.step_type,
@@ -33,7 +35,7 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       GROUP BY js.id
       ORDER BY js.sort_order
     ", $params);
-    
+
     while ($dao->fetch()) {
       $stepAnalytics[] = [
         'step_id' => $dao->step_id,
@@ -48,10 +50,10 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         'click_rate' => $dao->emails_opened > 0 ? round(($dao->emails_clicked / $dao->emails_opened) * 100, 2) : 0
       ];
     }
-    
+
     // Get overall journey stats
     $overallStats = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         COUNT(DISTINCT jp.contact_id) as total_participants,
         COUNT(CASE WHEN jp.status = 'active' THEN 1 END) as active_participants,
         COUNT(CASE WHEN jp.status = 'completed' THEN 1 END) as completed_participants,
@@ -60,9 +62,9 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       FROM civicrm_journey_participants jp
       WHERE jp.journey_id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     $overallStats->fetch();
-    
+
     return [
       'step_analytics' => $stepAnalytics,
       'overall_stats' => [
@@ -71,32 +73,32 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         'completed_participants' => (int) $overallStats->completed_participants,
         'exited_participants' => (int) $overallStats->exited_participants,
         'error_participants' => (int) $overallStats->error_participants,
-        'completion_rate' => $overallStats->total_participants > 0 ? 
+        'completion_rate' => $overallStats->total_participants > 0 ?
           round(($overallStats->completed_participants / $overallStats->total_participants) * 100, 2) : 0
       ]
     ];
   }
-  
+
   /**
    * Get journey list with basic stats
    */
   public static function getJourneyList($params = []) {
     $whereClause = "WHERE 1=1";
     $sqlParams = [];
-    
+
     if (!empty($params['status'])) {
       $whereClause .= " AND jc.status = %1";
       $sqlParams[1] = [$params['status'], 'String'];
     }
-    
+
     if (!empty($params['created_id'])) {
       $whereClause .= " AND jc.created_id = %2";
       $sqlParams[2] = [$params['created_id'], 'Positive'];
     }
-    
+
     $journeys = [];
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         jc.*,
         COUNT(DISTINCT jp.contact_id) as participant_count,
         COUNT(DISTINCT js.id) as step_count,
@@ -109,7 +111,7 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       GROUP BY jc.id
       ORDER BY jc.modified_date DESC, jc.created_date DESC
     ", $sqlParams);
-    
+
     while ($dao->fetch()) {
       $journeys[] = [
         'id' => $dao->id,
@@ -124,10 +126,10 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         'step_count' => (int) $dao->step_count
       ];
     }
-    
+
     return $journeys;
   }
-  
+
   /**
    * Duplicate an existing journey
    */
@@ -136,13 +138,13 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
     $originalJourney = CRM_Core_DAO::executeQuery("
       SELECT * FROM civicrm_journey_campaigns WHERE id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     if (!$originalJourney->fetch()) {
       throw new Exception('Journey not found');
     }
-    
+
     $newJourneyName = $newName ?: ($originalJourney->name . ' (Copy)');
-    
+
     // Create new journey
     CRM_Core_DAO::executeQuery("
       INSERT INTO civicrm_journey_campaigns
@@ -154,15 +156,15 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       3 => [$originalJourney->configuration, 'String'],
       4 => [CRM_Core_Session::getLoggedInContactID(), 'Positive']
     ]);
-    
+
     $newJourneyId = CRM_Core_DAO::singleValueQuery("SELECT LAST_INSERT_ID()");
-    
+
     // Copy steps
     $stepMapping = [];
     $stepsDao = CRM_Core_DAO::executeQuery("
       SELECT * FROM civicrm_journey_steps WHERE journey_id = %1 ORDER BY sort_order
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     while ($stepsDao->fetch()) {
       CRM_Core_DAO::executeQuery("
         INSERT INTO civicrm_journey_steps
@@ -177,19 +179,19 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         6 => [$stepsDao->position_y, 'Float'],
         7 => [$stepsDao->sort_order, 'Positive']
       ]);
-      
+
       $newStepId = CRM_Core_DAO::singleValueQuery("SELECT LAST_INSERT_ID()");
       $stepMapping[$stepsDao->id] = $newStepId;
     }
-    
+
     // Copy conditions
     $conditionsDao = CRM_Core_DAO::executeQuery("
-      SELECT jc.*, js.journey_id as original_journey_id 
+      SELECT jc.*, js.journey_id as original_journey_id
       FROM civicrm_journey_conditions jc
       INNER JOIN civicrm_journey_steps js ON jc.step_id = js.id
       WHERE js.journey_id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     while ($conditionsDao->fetch()) {
       if (isset($stepMapping[$conditionsDao->step_id])) {
         CRM_Core_DAO::executeQuery("
@@ -207,10 +209,10 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         ]);
       }
     }
-    
+
     return $newJourneyId;
   }
-  
+
   /**
    * Archive journey and all its data
    */
@@ -221,17 +223,17 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       SET status = 'archived', modified_date = NOW()
       WHERE id = %1
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     // Exit all active participants
     CRM_Core_DAO::executeQuery("
       UPDATE civicrm_journey_participants
       SET status = 'exited', completed_date = NOW()
       WHERE journey_id = %1 AND status IN ('active', 'paused')
     ", [1 => [$journeyId, 'Positive']]);
-    
+
     return TRUE;
   }
-  
+
   /**
    * Get participant details for a journey
    */
@@ -239,19 +241,19 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
     $whereClause = "WHERE jp.journey_id = %1";
     $sqlParams = [1 => [$journeyId, 'Positive']];
     $paramIndex = 2;
-    
+
     if (!empty($params['status'])) {
       $whereClause .= " AND jp.status = %{$paramIndex}";
       $sqlParams[$paramIndex] = [$params['status'], 'String'];
       $paramIndex++;
     }
-    
+
     if (!empty($params['current_step_id'])) {
       $whereClause .= " AND jp.current_step_id = %{$paramIndex}";
       $sqlParams[$paramIndex] = [$params['current_step_id'], 'Positive'];
       $paramIndex++;
     }
-    
+
     $limit = "";
     if (!empty($params['limit'])) {
       $limit = "LIMIT " . (int) $params['limit'];
@@ -259,10 +261,10 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         $limit = "LIMIT " . (int) $params['offset'] . ", " . (int) $params['limit'];
       }
     }
-    
+
     $participants = [];
     $dao = CRM_Core_DAO::executeQuery("
-      SELECT 
+      SELECT
         jp.*,
         c.display_name,
         c.email,
@@ -275,7 +277,7 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
       ORDER BY jp.entered_date DESC
       {$limit}
     ", $sqlParams);
-    
+
     while ($dao->fetch()) {
       $participants[] = [
         'id' => $dao->id,
@@ -290,7 +292,7 @@ class CRM_Journeybuilder_BAO_Journey extends CRM_Core_DAO {
         'last_action_date' => $dao->last_action_date
       ];
     }
-    
+
     return $participants;
   }
 }

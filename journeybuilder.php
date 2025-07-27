@@ -35,7 +35,21 @@ function journeybuilder_civicrm_enable(): void {
  * Implements hook_civicrm_navigationMenu().
  */
 function journeybuilder_civicrm_navigationMenu(&$menu) {
-  _journeybuilder_civix_insert_navigation_menu($menu, 'Mailings', [
+  $parentMenu = [[
+    'attributes' => [
+      'label' => E::ts('Marketing'),
+      'name' => 'marketing_main',
+      'url' => NULL,
+      'operator' => NULL,
+      'separator' => 0,
+      'active' => 1,
+      'icon' => 'crm-i fa-ticket',
+      'weight' => 35,
+      'permission' => 'administer CiviCRM'
+    ]]];
+  array_splice($menu, 6, 0, $parentMenu);
+
+  _journeybuilder_civix_insert_navigation_menu($menu, 'marketing_main', [
     'label' => E::ts('Journey Builder'),
     'name' => 'journey_builder',
     'url' => 'civicrm/journey/builder',
@@ -44,7 +58,7 @@ function journeybuilder_civicrm_navigationMenu(&$menu) {
     'separator' => 0,
   ]);
 
-  _journeybuilder_civix_insert_navigation_menu($menu, 'Mailings/journey_builder', [
+  _journeybuilder_civix_insert_navigation_menu($menu, 'marketing_main', [
     'label' => E::ts('Create Journey'),
     'name' => 'create_journey',
     'url' => 'civicrm/journey/create',
@@ -53,11 +67,21 @@ function journeybuilder_civicrm_navigationMenu(&$menu) {
     'separator' => 0,
   ]);
 
-  _journeybuilder_civix_insert_navigation_menu($menu, 'Mailings/journey_builder', [
+  _journeybuilder_civix_insert_navigation_menu($menu, 'marketing_main', [
     'label' => E::ts('Journey Analytics'),
     'name' => 'journey_analytics',
     'url' => 'civicrm/journey/analytics',
-    'permission' => 'access CiviMail,view all mailings',
+    'permission' => 'access CiviMail',
+    'operator' => 'OR',
+    'separator' => 0,
+  ]);
+
+  // Add Journey Builder main menu item
+  _journeybuilder_civix_insert_navigation_menu($menu, 'marketing_main', [
+    'label' => E::ts('Journey Builder'),
+    'name' => 'journey_builder',
+    'url' => 'civicrm/journey/list',
+    'permission' => 'administer CiviCRM',
     'operator' => 'OR',
     'separator' => 0,
   ]);
