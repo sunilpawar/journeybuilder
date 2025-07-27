@@ -7,9 +7,15 @@
     <access_arguments>access CiviCRM</access_arguments>
   </item>
   <item>
-    <path>civicrm/journey/Analytics</path>
+    <path>civicrm/journey/analytics</path>
     <page_callback>CRM_Journeybuilder_Page_Analytics</page_callback>
     <title>Analytics</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/journey/list</path>
+    <page_callback>CRM_Journeybuilder_Page_JourneyList</page_callback>
+    <title>Journey List</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>
